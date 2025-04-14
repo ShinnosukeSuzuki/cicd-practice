@@ -22,13 +22,11 @@ jobs:
       - name: Extract Unique Directories
         id: extract-dirs
         run: |
-          unique_dirs=$(echo '${{ steps.changed-files.outputs.all_changed_and_modified_files }}' | 
-            jq -r 'fromjson | 
-              map(dirname) |  # dirnameに相当する処理
-              unique |        # 重複を削除
-              join(" ")')     # スペース区切りの文字列に変換
+          unique_dirs=$(echo $all_changed_and_modified_files | jq -r '.[]' | xargs -n1 dirname | sort -u | jq -R -s -c 'split("\n")[:-1]')
           echo "unique_dirs=${unique_dirs}" >> "$GITHUB_OUTPUT"
           echo "Unique directories: ${unique_dirs}"
+        env:
+            all_changed_and_modified_files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
     outputs:
         terraform-modified: ${{ steps.changed-files.outputs.any_changed }}
         terraform-modified-dirs: ${{ steps.extract-dirs.outputs.unique_dirs }}
