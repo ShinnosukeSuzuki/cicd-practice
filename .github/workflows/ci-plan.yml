@@ -23,7 +23,7 @@ jobs:
         terraform-modified: ${{ steps.terraform-changed-files.outputs.any_changed }}
         terraform-modified-files: ${{ steps.terraform-changed-files.outputs.all_changed_and_modified_files }}
   plan:
-    if: needs.changes.outputs.terraform-modified == 'true'
+    if: needs.changes.outputs.terraform-modified
     runs-on: ubuntu-latest
     timeout-minutes: 30 # mins. Default is 360 mins.
     needs: [changes]
