@@ -40,9 +40,6 @@ jobs:
     permissions:
       contents: read # To checkout
       pull-requests: write # To comment on PRs
-    defaults:
-      run:
-        working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-dirs) }}
     strategy:
       fail-fast: false
       matrix:
