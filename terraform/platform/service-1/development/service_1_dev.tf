@@ -1,3 +1,2 @@
-resource "test" "name_1_piyo" {
-  name = "name_1_piyo"
+resource "google_access_context_manager_access_level" "service_1_dev" {
 }
