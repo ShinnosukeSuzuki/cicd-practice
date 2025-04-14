@@ -22,7 +22,11 @@ jobs:
       - name: Extract Unique Directories
         id: extract-dirs
         run: |
-          unique_dirs=$(echo $all_changed_and_modified_files | jq -r '.[]' | xargs -n1 dirname | sort -u | jq -R -s -c 'split("\n")[:-1]')
+          if [ "$(echo "$all_changed_and_modified_files" | jq 'length')" -eq 0 ]; then
+            unique_dirs='[]'
+          else
+            unique_dirs=$(echo "$all_changed_and_modified_files" | jq -r '.[]' | xargs -n1 dirname | sort -u | jq -R -s -c 'split("\n")[:-1]')
+          fi
           echo "unique_dirs=${unique_dirs}" >> "$GITHUB_OUTPUT"
           echo "Unique directories: ${unique_dirs}"
         env:
