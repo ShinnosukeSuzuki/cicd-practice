@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-terraform-modified-dirs) }}
+        working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-dirs) }}
     steps:
       - uses: actions/checkout@v4
       - id: echo-pwd
