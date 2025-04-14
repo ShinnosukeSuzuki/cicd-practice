@@ -2,7 +2,7 @@ name: Terraform Plan
 on:
   pull_request:
     branches: [main]
-    paths: ['terraform/**/*.{hcl,tf,yaml}']
+    # paths: ['terraform/**/*.{hcl,tf,yaml}']
 defaults:
   run:
     shell: bash # Use bash shell for all run steps
@@ -13,12 +13,10 @@ jobs:
       contents: read # To checkout
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-            dir_names_max_depth: 3
+            dir_names_max_depth: 4
             files: terraform/**/*.{hcl,tf,yaml}
             matrix: true
     outputs:
@@ -43,8 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: echo-pwd
-        run: echo "PWD=${{ matrix.working-directory }}" >> "${GITHUB_OUTPUT}}"
-      - run: gh pr comment "${GITHUB_HEAD_REF}" --body "PWD=${PWD}"
+        run: echo "PWD=${{ matrix.working-directory }}" >> "$GITHUB_OUTPUT"
+      - run: gh pr comment "$GITHUB_HEAD_REF" --body "PWD=${PWD}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PWD: ${{ steps.echo-pwd.outputs.PWD }}
