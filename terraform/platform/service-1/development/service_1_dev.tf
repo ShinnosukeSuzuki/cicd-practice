@@ -1,3 +1,3 @@
-resource "test" "name_1_hogehoge" {
-  name = "name_1_hogehoge"
+resource "test" "name_1_piyo" {
+  name = "name_1_piyo"
 }
