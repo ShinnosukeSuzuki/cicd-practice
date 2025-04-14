@@ -1,3 +1,3 @@
 resource "test" "name_1_hogehoge" {
-  name = "hoge"
+  name = "name_1_hogehoge"
 }
