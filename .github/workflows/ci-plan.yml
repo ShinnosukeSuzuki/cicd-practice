@@ -19,9 +19,21 @@ jobs:
             # dir_names_max_depth: 4
             # files: terraform/**/*
             matrix: true
+      - name: Extract Unique Directories
+        id: extract-dirs
+        run: |
+            unique_dirs=$(echo '${{ steps.changed-files.outputs.all_changed_and_modified_files }}' | 
+            tr ' ' '\n' |  # スペース区切りを改行に変換
+            xargs -I {} dirname {} |  # dirnameで各ファイルのディレクトリパスを取得
+            sort -u |  # ソートして重複を削除
+            tr '\n' ' ' |  # 改行をスペースに戻す
+            sed 's/ $//')  # 末尾の空白を削除
+            
+            echo "unique_dirs=${unique_dirs}" >> "$GITHUB_OUTPUT"
+            echo "Unique directories: ${unique_dirs}"
     outputs:
         terraform-modified: ${{ steps.changed-files.outputs.any_changed }}
-        terraform-modified-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+        terraform-modified-dirs: ${{ steps.extract-dirs.outputs.unique_dirs }}
   plan:
     if: needs.changes.outputs.terraform-modified
     runs-on: ubuntu-latest
@@ -36,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-files) }}
+        working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-terraform-modified-dirs) }}
     steps:
       - uses: actions/checkout@v4
       - id: echo-pwd
