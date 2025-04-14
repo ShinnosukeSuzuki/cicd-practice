@@ -20,8 +20,8 @@ jobs:
             # files: terraform/**/*
             matrix: true
     outputs:
-        terraform-modified: ${{ steps.terraform-changed-files.outputs.any_changed }}
-        terraform-modified-files: ${{ steps.terraform-changed-files.outputs.all_changed_and_modified_files }}
+        terraform-modified: ${{ steps.changed-files.outputs.any_changed }}
+        terraform-modified-files: ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
   plan:
     if: needs.changes.outputs.terraform-modified
     runs-on: ubuntu-latest
