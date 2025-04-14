@@ -22,7 +22,7 @@ jobs:
         id: extract-dirs
         run: |
           if [ "$(echo "$all_changed_and_modified_files" | jq 'length')" -eq 0 ]; then
-            unique_dirs='["skip"]'
+            unique_dirs='[]'
           else
             unique_dirs=$(echo "$all_changed_and_modified_files" | jq -r '.[]' | xargs -n1 dirname | sort -u | jq -R -s -c 'split("\n")[:-1]')
           fi
@@ -32,7 +32,7 @@ jobs:
     outputs:
         terraform-modified-dirs: ${{ steps.extract-dirs.outputs.unique_dirs }}
   plan:
-    # if: ${{ needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
+    if: ${{ needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30 # mins. Default is 360 mins.
     needs: [changes]
