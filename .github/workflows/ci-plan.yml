@@ -31,6 +31,7 @@ jobs:
         terraform-modified: ${{ steps.changed-files.outputs.any_changed }}
         terraform-modified-dirs: ${{ steps.extract-dirs.outputs.unique_dirs }}
   plan:
+    name: Terraform Plan
     if: needs.changes.outputs.terraform-modified
     runs-on: ubuntu-latest
     timeout-minutes: 30 # mins. Default is 360 mins.
