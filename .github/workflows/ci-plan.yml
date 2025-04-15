@@ -15,7 +15,6 @@ jobs:
       - id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-            # dir_names_max_depth: 4
             files: terraform/**/*.{hcl,tf,yaml}
             matrix: true
       - name: Extract Unique Directories
@@ -46,10 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: echo-pwd
-        if: matrix.working-directory != 'skip'
         run: echo "PWD=${{ matrix.working-directory }}" >> "$GITHUB_OUTPUT"
-      - if : matrix.working-directory != 'skip'
-        run: gh pr comment "$GITHUB_HEAD_REF" --body "PWD=${PWD}"
+      - run: gh pr comment "$GITHUB_HEAD_REF" --body "PWD=${PWD}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PWD: ${{ steps.echo-pwd.outputs.PWD }}
