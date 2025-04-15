@@ -45,7 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: echo-pwd
-        run: echo "PWD=${{ matrix.working-directory }}" >> "$GITHUB_OUTPUT"
+        run: echo "PWD=${PWD}" >> "$GITHUB_OUTPUT"
+        working-directory: ${{ matrix.working-directory }}
       - run: gh pr comment "$GITHUB_HEAD_REF" --body "PWD=${PWD}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
