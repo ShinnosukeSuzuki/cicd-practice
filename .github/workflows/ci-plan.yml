@@ -40,6 +40,7 @@ jobs:
     needs: [changes]
     permissions:
       contents: read # To checkout
+      id-token: write # To assume role
       pull-requests: write # To comment on PRs
     strategy:
       fail-fast: false
@@ -81,9 +82,14 @@ jobs:
               body: `## Terraform checks in directory '${{ matrix.working-directory }}'\n` + output
             })
   finish:
-    if: ${{ needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
+    if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
     needs: [changes,plan]
     steps:
+      - name: Check plan job status
+        if: ${{ needs.plan.result != 'success' }}
+        run: |
+          echo "Terraform plan job did not succeed"
+          exit 1
       - name: Finish
         run: echo "Finished"
