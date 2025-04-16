@@ -74,6 +74,7 @@ jobs:
         with:
           token: ${{ github.token }}
           planfile: .planfile
+          working-directory: ${{ matrix.working-directory }}
   finish:
     if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
