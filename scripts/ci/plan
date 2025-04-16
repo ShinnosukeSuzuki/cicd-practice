@@ -1,0 +1,27 @@
+#!/bin/bash
+
+project_root_dir="$(git rev-parse --show-toplevel)"
+
+source "${project_root_dir}/scripts/ci/_terraform"
+
+usage() {
+  echo "Usage: scripts/ci/plan <terraform-module-dir>"
+  echo ""
+  echo "Examples:"
+  echo "  scripts/ci/plan platforms/github-actions/development"
+}
+
+main() {
+  arg_dir="$1"
+  declare -r work_dir="${project_root_dir}/${arg_dir}"
+  if [ -z "${work_dir}" ] || [ ! -d "${work_dir}" ]; then
+    usage
+    return 1
+  fi
+
+  run_terraform_version
+  run_terraform_init "${work_dir}"
+  run_terraform_plan "${work_dir}"
+}
+
+main "${@}"

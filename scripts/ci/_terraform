@@ -1,0 +1,53 @@
+#!/bin/bash
+
+run_terraform_version() {
+  terraform version
+}
+
+run_terraform_fmt() {
+  set -e
+
+  pushd $1
+  terraform fmt -diff=true -check=true
+  popd
+}
+
+run_terraform_init() {
+  set -e
+
+  pushd $1
+  terraform init -lock=true -input=false
+  popd
+}
+
+run_terraform_validate() {
+  set -e
+
+  pushd $1
+  terraform validate
+  popd
+}
+
+run_terraform_plan() {
+  set -e
+
+  pushd $1
+  terraform plan -lock=true -input=false
+  popd
+}
+
+run_terraform_apply() {
+  set -e
+
+  pushd $1
+  terraform apply -lock=true -auto-approve -input=false
+  popd
+}
+
+run_terraform_destroy() {
+  set -e
+
+  pushd $1
+  terraform destroy -auto-approve
+  popd
+}
