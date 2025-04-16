@@ -70,18 +70,10 @@ jobs:
         run: terraform plan -no-color
         working-directory: ${{ matrix.working-directory }}
       - name: Comment PR
-        uses: actions/github-script@v3
+        uses: borchero/terraform-plan-comment@v2
         with:
-          github-token: ${{ github.token }}
-          script: |
-            const output = `#### Terraform Initialization ⚙️\`${{ steps.init.outputs.stdout }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outputs.stdout }}\``;
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Terraform checks in directory '${{ matrix.working-directory }}'\n` + output
-            })
+          token: ${{ github.token }}
+          planfile: .planfile
   finish:
     if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
