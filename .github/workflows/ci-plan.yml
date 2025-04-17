@@ -48,22 +48,67 @@ jobs:
         working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-dirs) }}
     steps:
       - uses: actions/checkout@v4
+      - name: Load Configuration
+        id: load_config
+        run: |
+            # JSONファイルのテンプレートを作成
+            echo '{
+            "terraform/platform/service-1/development": {
+                "name": "service-1",
+                "type": "terraform",
+                "path": "terraform/platform/service-1/development",
+                "description": "Terraform configuration for service 1 in development environment",
+                "variables": {
+                "baket_name": "${{ secrets.DEV_BUCKET_NAME }}",
+                "assume_role": "${{ secrets.DEV_ASSUME_ROLE }}"
+                }
+            },
+            "terraform/platform/service-1/production": {
+                "name": "service-1",
+                "type": "terraform",
+                "path": "terraform/platform/service-1/production",
+                "description": "Terraform configuration for service 1 in production environment",
+                "variables": {
+                "baket_name": "${{ secrets.PROD_BUCKET_NAME }}",
+                "assume_role": "${{ secrets.PROD_ASSUME_ROLE }}"
+                }
+            }
+            }' > terraform-config.json
+            echo "config_file=terraform-config.json" >> $GITHUB_OUTPUT
+      - name: Process Configuration
+        id: process_config
+        run: |
+            # 生成されたJSONファイルを使用
+            CONFIG_FILE="${{ steps.load_config.outputs.config_file }}"
+            
+            # 現在のディレクトリの設定を取得
+            DIR_CONFIG=$(cat $CONFIG_FILE | jq -r --arg dir "${{ matrix.working-directory }}" '.[$dir]')
+            
+            # 設定が存在するか確認
+            if [ "$DIR_CONFIG" == "null" ]; then
+            echo "No configuration found for directory: ${{ matrix.working-directory }}"
+            exit 1
+            fi
+            
+            # 必要な変数を出力
+            BUCKET_NAME=$(echo $DIR_CONFIG | jq -r '.variables.baket_name')
+            ASSUME_ROLE=$(echo $DIR_CONFIG | jq -r '.variables.assume_role')
+            
+            echo "bucket_name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+            echo "assume_role=$ASSUME_ROLE" >> $GITHUB_OUTPUT
+            echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
       - name: Setup AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-to-assume: ${{ steps.process_config.outputs.assume_role }}
           aws-region: ${{ env.AWS_REGION }}
-        env:
-          ROLE_TO_ASSUME: ${{ secrets.ROLE_TO_ASSUME }}
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
       - name: Terraform Init
         id: init
-        run: terraform init -backend-config="bucket=$TF_VAR_BUCKET_NAME"
-        env:
-          TF_VAR_BUCKET_NAME: ${{ secrets.TF_VAR_BUCKET_NAME }}
+        run: terraform init -backend-config="bucket=${{ steps.process_config.outputs.bucket_name }}"
         working-directory: ${{ matrix.working-directory }}
       - name: Terraform Plan
         id: plan
