@@ -1,0 +1,18 @@
+{
+    "platform-development": {
+        "name": "Platform Development",
+        "description": "Terraform project for platform development.",
+        "variables": {
+            "workload_identity_provider": "projects/1234567890/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+            "service_account": "hogehoge@piyopiyo-dev.iam.gserviceaccount.com"
+        }
+    },
+    "platform-production": {
+        "name": "Platform Production",
+        "description": "Terraform project for platform production.",
+        "variables": {
+            "workload_identity_provider": "projects/0987654321/locations/global/workloadIdentityPools/my-pool/providers/my-provider",
+            "service_account":  "hogehoge@piyopiyo-prd.iam.gserviceaccount.com"
+        }
+    }
+}
