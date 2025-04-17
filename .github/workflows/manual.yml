@@ -10,5 +10,34 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: 
+          - platform-development
+          - platform-production
     steps:
-      - run: echo "${{ inputs.greeting }}"
+      - name: Load Configuration
+        id: config
+        uses: jossef/action-load-json@v1
+        with:
+            path: '.github/config/terraform-config.json'
+      - name: Extract Directory Configuration
+        id: dir-config
+        uses: sergeysova/jq-action@v2
+        with:
+            cmd: 'jq --arg dir "${{ matrix.project }}" ".[$dir]" ${{ steps.config.outputs.json }}'
+      - run: |
+            echo "project: ${{ matrix.project }}"
+            echo "dir-config: ${{ steps.dir-config.outputs.result }}"
+            DIR_CONFIG="${{ steps.dir-config.outputs.result }}"
+            # 設定が存在するか確認
+            if [ "$DIR_CONFIG" == "null" ]; then
+            echo "No configuration found for directory: ${{ matrix.project }}"
+            exit 1
+            fi
+            # 必要な変数を出力
+            workload_identity_provider=$(echo $DIR_CONFIG | jq -r '.variables.workload_identity_provider')
+            service_account=$(echo $DIR_CONFIG | jq -r '.variables.service_account')
+            echo "workload_identity_provider: $workload_identity_provider"
+            echo "service_account: $service_account"
