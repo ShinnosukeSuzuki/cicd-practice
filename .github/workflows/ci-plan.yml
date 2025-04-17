@@ -117,6 +117,7 @@ jobs:
       - name: Comment PR
         uses: borchero/terraform-plan-comment@v2
         with:
+          header: "📝 Terraform Plan - ${{ matrix.working-directory }}"
           token: ${{ github.token }}
           planfile: .planfile
           working-directory: ${{ matrix.working-directory }}
