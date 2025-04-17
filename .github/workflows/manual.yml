@@ -10,5 +10,39 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # To checkout
+    strategy:
+      fail-fast: false
+      matrix:
+        project: 
+          - platform-development
+          - platform-production
     steps:
-      - run: echo "${{ inputs.greeting }}"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Load Configuration
+        id: config
+        run: |
+            echo "CONFIG_FILE=.github/config/terraform-project.json" >> $GITHUB_OUTPUT
+      - name: Process Configuration
+        id: process_config
+        run: |
+            # 生成されたJSONファイルを使用
+            CONFIG_FILE="${{ steps.config.outputs.CONFIG_FILE }}"
+            
+            # 現在のディレクトリの設定を取得
+            DIR_CONFIG=$(cat $CONFIG_FILE | jq -r --arg dir "${{ matrix.project }}" '.[$dir]')
+            
+            # 設定が存在するか確認
+            if [ "$DIR_CONFIG" == "null" ]; then
+            echo "No configuration found for directory: ${{ matrix.project }}"
+            exit 1
+            fi
+            
+            # 必要な変数を出力
+            workload_identity_provider=$(echo $DIR_CONFIG | jq -r '.variables.workload_identity_provider')
+            service_account=$(echo $DIR_CONFIG | jq -r '.variables.service_account')
+            
+            echo "workload_identity_provider=$workload_identity_provider"
+            echo "service_account=$service_account" 
