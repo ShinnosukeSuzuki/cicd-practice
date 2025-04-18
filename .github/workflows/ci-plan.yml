@@ -46,6 +46,9 @@ jobs:
       fail-fast: false
       matrix:
         working-directory: ${{ fromJson(needs.changes.outputs.terraform-modified-dirs) }}
+    defaults:
+        run:
+            working-directory: ${{ matrix.working-directory }}
     steps:
       - uses: actions/checkout@v4
       - name: Load Configuration
@@ -106,21 +109,20 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+      - name: setup tfcmt
+        env:
+          TFCMT_VERSION: v4.14.5
+        run: |
+          wget "https://github.com/suzuki-shunsuke/tfcmt/releases/download/${TFCMT_VERSION}/tfcmt_linux_amd64.tar.gz" -O /tmp/tfcmt.tar.gz
+          tar xzf /tmp/tfcmt.tar.gz -C /tmp
+          mv /tmp/tfcmt /usr/local/bin
+          tfcmt --version
       - name: Terraform Init
         id: init
         run: terraform init -backend-config="bucket=${{ steps.process_config.outputs.bucket_name }}"
-        working-directory: ${{ matrix.working-directory }}
       - name: Terraform Plan
         id: plan
-        run: terraform plan -out .planfile
-        working-directory: ${{ matrix.working-directory }}
-      - name: Comment PR
-        uses: borchero/terraform-plan-comment@v2
-        with:
-          header: "📝 Terraform Plan - ${{ matrix.working-directory }}"
-          token: ${{ github.token }}
-          planfile: .planfile
-          working-directory: ${{ matrix.working-directory }}
+        run: tfcmt -var target:${{ matrix.working-directory }} plan -- terraform plan
   finish:
     if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
