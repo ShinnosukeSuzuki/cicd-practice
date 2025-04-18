@@ -110,12 +110,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      - name: setup tfcmt
-        run: |
-          wget "https://github.com/suzuki-shunsuke/tfcmt/releases/download/${{ env.TFCMT_VERSION }}/tfcmt_linux_amd64.tar.gz" -O /tmp/tfcmt.tar.gz
-          tar xzf /tmp/tfcmt.tar.gz -C /tmp
-          mv /tmp/tfcmt /usr/local/bin
-          tfcmt --version
+      - name: Setup tfcmt
+        uses: shmokmt/actions-setup-tfcmt@v2
+        with:
+          version: ${{ env.TFCMT_VERSION }}
       - name: Terraform Init
         id: init
         run: terraform init -backend-config="bucket=${{ steps.process_config.outputs.bucket_name }}"
