@@ -15,34 +15,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: 
-          - platform-development
-          - platform-production
+        working-directory: 
+          - terraform/platform/service-1/development
+          - terraform/platform/service-1/production
+    defaults:
+      run:
+        working-directory: ${{ matrix.working-directory }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Load Configuration
-        id: config
+      - name: Get Google Cloud Project ID and Google Cloud Project Number
+        id: get_gcp_project_info
         run: |
-            echo "CONFIG_FILE=.github/config/terraform-project.json" >> $GITHUB_OUTPUT
-      - name: Process Configuration
-        id: process_config
+            # Extract the values from variables.tf
+            GCP_PROJECT_ID=$(grep -A 3 'variable "gcp_project_id"' variables.tf | grep default | awk '{print $3}' | tr -d '"')
+            GCP_PROJECT_NUMBER=$(grep -A 3 'variable "gcp_project_number"' variables.tf | grep default | awk '{print $3}' | tr -d '"')
+            echo "GCP_PROJECT_ID=${GCP_PROJECT_ID}" >> $GITHUB_OUTPUT
+            echo "GCP_PROJECT_NUMBER=${GCP_PROJECT_NUMBER}" >> $GITHUB_OUTPUT
+      - name: check GCP info
         run: |
-            # 生成されたJSONファイルを使用
-            CONFIG_FILE="${{ steps.config.outputs.CONFIG_FILE }}"
-            
-            # 現在のディレクトリの設定を取得
-            DIR_CONFIG=$(cat $CONFIG_FILE | jq -r --arg dir "${{ matrix.project }}" '.[$dir]')
-            
-            # 設定が存在するか確認
-            if [ "$DIR_CONFIG" == "null" ]; then
-            echo "No configuration found for directory: ${{ matrix.project }}"
-            exit 1
-            fi
-            
-            # 必要な変数を出力
-            workload_identity_provider=$(echo $DIR_CONFIG | jq -r '.variables.workload_identity_provider')
-            service_account=$(echo $DIR_CONFIG | jq -r '.variables.service_account')
-            
-            echo "workload_identity_provider=$workload_identity_provider"
-            echo "service_account=$service_account" 
+            echo "workload_identity_provider: projects/${GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/gh-actions/providers/hogehoge"
+            echo "service_account: hogehoge-terraform@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
+        env:
+          GCP_PROJECT_ID: ${{ steps.get_gcp_project_info.outputs.GCP_PROJECT_ID }}
+          GCP_PROJECT_NUMBER: ${{ steps.get_gcp_project_info.outputs.GCP_PROJECT_NUMBER }}
