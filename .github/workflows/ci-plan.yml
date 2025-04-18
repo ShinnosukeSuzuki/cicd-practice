@@ -123,6 +123,8 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: tfcmt -var target:${{ matrix.working-directory }} plan -- terraform plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
   finish:
     if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
