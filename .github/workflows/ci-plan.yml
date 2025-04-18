@@ -42,6 +42,7 @@ jobs:
       contents: read # To checkout
       id-token: write # To assume role
       pull-requests: write # To comment on PRs
+      issues: write # To manage labels on PRs
     strategy:
       fail-fast: false
       matrix:
