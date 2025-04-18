@@ -123,9 +123,10 @@ jobs:
         run: terraform init -backend-config="bucket=${{ steps.process_config.outputs.bucket_name }}"
       - name: Terraform Plan
         id: plan
-        run: tfcmt -var target:${{ matrix.working-directory }} plan -patch -- terraform plan
+        run: tfcmt -var "target:${MATRIX_DIR//\//-}" plan -patch -- terraform plan
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          MATRIX_DIR: ${{ matrix.working-directory }}
   finish:
     if: ${{ always() && needs.changes.outputs.terraform-modified-dirs != '[]' && needs.changes.outputs.terraform-modified-dirs != '' }}
     runs-on: ubuntu-latest
