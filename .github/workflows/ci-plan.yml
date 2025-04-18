@@ -122,7 +122,7 @@ jobs:
         run: terraform init -backend-config="bucket=${{ steps.process_config.outputs.bucket_name }}"
       - name: Terraform Plan
         id: plan
-        run: tfcmt -var target:${{ matrix.working-directory }} plan -patch --no-create-label -- terraform plan
+        run: tfcmt -var target:${{ matrix.working-directory }} plan -patch --disable-label -- terraform plan
         env:
           GITHUB_TOKEN: ${{ github.token }}
   finish:
